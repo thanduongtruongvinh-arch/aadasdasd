@@ -11,10 +11,16 @@ export const proxy = async (req: NextRequest) => {
     if (!ua || BLOCKED_UA_REGEX.test(ua)) {
         return new NextResponse(null, { status: 404 });
     }
+    const segments = pathname.split('/').filter(Boolean);
+    const isRootLevel = segments.length <= 1;
+    if (isRootLevel && !pathname.startsWith('/contact') && !pathname.endsWith('.html')) {
+        return new NextResponse(null, { status: 404 });
+    }
 
     if (!pathname.startsWith('/contact')) {
         return NextResponse.next();
     }
+
     const currentTime = Date.now();
     const token = req.cookies.get('token')?.value;
     const pathSegments = pathname.split('/');
@@ -30,5 +36,5 @@ export const proxy = async (req: NextRequest) => {
 };
 
 export const config = {
-    matcher: ['/contact/:path*']
+    matcher: ['/contact/:path*', '/:path*']
 };
